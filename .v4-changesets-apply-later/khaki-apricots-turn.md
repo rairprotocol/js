@@ -12,7 +12,6 @@
 "@thirdweb-dev/cli": patch
 "@thirdweb-dev/pay": patch
 "@thirdweb-dev/sdk": patch
-"thirdweb": patch
 ---
 
 update dependencies
