@@ -1,8 +1,10 @@
 import { CheckCircledIcon } from "@radix-ui/react-icons";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import type { ThirdwebClient } from "../../../../client/client.js";
+import { isNativeTokenAddress } from "../../../../constants/addresses.js";
 import type { WaitForReceiptOptions } from "../../../../transaction/actions/wait-for-tx-receipt.js";
 import type { PreparedTransaction } from "../../../../transaction/prepare-transaction.js";
+import { toTokens } from "../../../../utils/units.js";
 import type { Wallet } from "../../../../wallets/interfaces/wallet.js";
 import { CustomThemeProvider } from "../../../core/design-system/CustomThemeProvider.js";
 import { type Theme, iconSize } from "../../../core/design-system/index.js";
@@ -56,6 +58,7 @@ export function useSendTransaction(config: SendTransactionConfig = {}) {
     payModalEnabled = false;
   }
 
+  // TODO handle erc20 pay modal
   // if active wallet is smart wallet with gasless enabled, don't show the pay modal
   if (activeWallet && activeWallet.id === "smart") {
     const options = (activeWallet as Wallet<"smart">).getConfig();
@@ -69,12 +72,36 @@ export function useSendTransaction(config: SendTransactionConfig = {}) {
     }
   }
 
+  if (activeWallet && activeWallet.id === "inApp") {
+    const options = (activeWallet as Wallet<"inApp">).getConfig();
+
+    if (options && "smartAccount" in options && options.smartAccount) {
+      const smartOptions = options.smartAccount;
+      if ("sponsorGas" in smartOptions && smartOptions.sponsorGas === true) {
+        payModalEnabled = false;
+      }
+
+      if ("gasless" in smartOptions && smartOptions.gasless === true) {
+        payModalEnabled = false;
+      }
+    }
+  }
+
   const setRootEl = useContext(SetRootElementContext);
   return useSendTransactionCore({
     showPayModal:
       !payModalEnabled || payModal === false
         ? undefined
         : (data) => {
+            const prefillBuy: PayUIOptions["prefillBuy"] =
+              data.currency && !isNativeTokenAddress(data.currency.address)
+                ? {
+                    chain: data.tx.chain,
+                    amount: toTokens(data.totalCostWei, data.currency.decimals),
+                    token: data.currency,
+                  }
+                : undefined;
+            console.log("prefillBuy", prefillBuy);
             setRootEl(
               <TxModal
                 tx={data.tx}
@@ -92,11 +119,14 @@ export function useSendTransaction(config: SendTransactionConfig = {}) {
                 theme={payModal?.theme || "dark"}
                 txCostWei={data.totalCostWei}
                 walletBalanceWei={data.walletBalance.value}
-                nativeTokenSymbol={data.walletBalance.symbol}
+                nativeTokenSymbol={
+                  data.currency?.symbol || data.walletBalance.symbol
+                }
                 payOptions={{
                   buyWithCrypto: payModal?.buyWithCrypto,
                   buyWithFiat: payModal?.buyWithFiat,
                   purchaseData: payModal?.purchaseData,
+                  prefillBuy,
                 }}
               />,
             );

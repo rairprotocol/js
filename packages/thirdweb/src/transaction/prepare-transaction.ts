@@ -23,6 +23,12 @@ export type StaticPrepareTransactionOptions = {
   // tw specific
   chain: Chain;
   client: ThirdwebClient;
+  // extras
+  erc20Value?: {
+    amountWei: bigint;
+    tokenAddress: Address;
+    needsApprove?: boolean;
+  };
 };
 
 export type EIP712TransactionOptions = {
