@@ -11,7 +11,7 @@ import {
   type PreparedMethod,
   prepareMethod,
 } from "../utils/abi/prepare-method.js";
-import type { Hex } from "../utils/encoding/hex.js";
+import type { Hex, ToHexInput } from "../utils/encoding/hex.js";
 import { resolvePromisedValue } from "../utils/promise/resolve-promised-value.js";
 import {
   type PrepareTransactionOptions,
@@ -53,7 +53,7 @@ export type PrepareContractCallOptions<
   > & {
     contract: ThirdwebContract<TAbi>;
     method: TMethod | TPreparedMethod;
-    extraCallData?: string | number | bigint | boolean | Uint8Array;
+    extraCallData?: ToHexInput;
   } & ParamsOption<TPreparedMethod[1]> &
     Omit<PrepareTransactionOptions, "to" | "data" | "chain" | "client">,
   TAbi
