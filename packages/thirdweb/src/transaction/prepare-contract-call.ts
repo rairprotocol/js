@@ -195,22 +195,25 @@ export function prepareContractCall<
           preparedM = await preparedMethodPromise();
         }
 
-        let extraData = "";
+        let extraData: Hex | null = null;
         if (extraCallData) {
           const { toHex } = await import("../utils/encoding/hex.js");
-          extraData = toHex(extraCallData).slice(2);
+          extraData = toHex(extraCallData);
         }
 
+        // just return the fn sig directly -> no params
         if (preparedM[1].length === 0) {
-          // just return the fn sig directly -> no params
-          return (preparedM[0] + extraData) as Hex;
+          if (extraData) {
+            const { concatHex } = await import(
+              "../utils/encoding/helpers/concat-hex.js"
+            );
+            return concatHex([preparedM[0], extraData]);
+          }
+          return preparedM[0];
         }
 
         // we do a "manual" concat here to avoid the overhead of the "concatHex" function
         // we can do this because we know the specific formats of the values
-
-        // "0x45t26435" + "443t"
-
         return (preparedM[0] +
           encodeAbiParameters(
             preparedM[1],
