@@ -212,6 +212,22 @@ export function prepareContractCall<
           return preparedM[0];
         }
 
+        if (extraData) {
+          const [{ concatHex }, resolvedParams] = await Promise.all([
+            import("../utils/encoding/helpers/concat-hex.js"),
+            resolvePromisedValue(params ?? []),
+          ]);
+          return concatHex([
+            preparedM[0],
+            encodeAbiParameters(
+              preparedM[1],
+              // @ts-expect-error - TODO: fix this type issue
+              resolvedParams,
+            ),
+            extraData,
+          ]);
+        }
+
         // we do a "manual" concat here to avoid the overhead of the "concatHex" function
         // we can do this because we know the specific formats of the values
         return (preparedM[0] +
@@ -219,8 +235,7 @@ export function prepareContractCall<
             preparedM[1],
             // @ts-expect-error - TODO: fix this type issue
             await resolvePromisedValue(params ?? []),
-          ).slice(2) +
-          extraData) as `${(typeof preparedM)[0]}${string}`;
+          ).slice(2)) as `${(typeof preparedM)[0]}${string}`;
       },
     },
     {
