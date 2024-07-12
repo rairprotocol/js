@@ -11,6 +11,7 @@ import {
   type PreparedMethod,
   prepareMethod,
 } from "../utils/abi/prepare-method.js";
+import type { Hex } from "../utils/encoding/hex.js";
 import { resolvePromisedValue } from "../utils/promise/resolve-promised-value.js";
 import {
   type PrepareTransactionOptions,
@@ -52,6 +53,7 @@ export type PrepareContractCallOptions<
   > & {
     contract: ThirdwebContract<TAbi>;
     method: TMethod | TPreparedMethod;
+    extraCallData?: string | number | bigint | boolean | Uint8Array;
   } & ParamsOption<TPreparedMethod[1]> &
     Omit<PrepareTransactionOptions, "to" | "data" | "chain" | "client">,
   TAbi
@@ -138,7 +140,7 @@ export function prepareContractCall<
 >(options: PrepareContractCallOptions<TAbi, TMethod, TPreparedMethod>) {
   type ParsedMethod_ = ParseMethod<TAbi, TMethod>;
   type PreparedMethod_ = PreparedMethod<ParsedMethod_>;
-  const { contract, method, params, ...rest } = options;
+  const { contract, method, params, extraCallData, ...rest } = options;
 
   const preparedMethodPromise = () =>
     (async () => {
@@ -193,19 +195,29 @@ export function prepareContractCall<
           preparedM = await preparedMethodPromise();
         }
 
+        let extraData = "";
+        if (extraCallData) {
+          const { toHex } = await import("../utils/encoding/hex.js");
+          extraData = toHex(extraCallData).slice(2);
+        }
+
         if (preparedM[1].length === 0) {
           // just return the fn sig directly -> no params
-          return preparedM[0];
+          return (preparedM[0] + extraData) as Hex;
         }
 
         // we do a "manual" concat here to avoid the overhead of the "concatHex" function
         // we can do this because we know the specific formats of the values
+
+        // "0x45t26435" + "443t"
+
         return (preparedM[0] +
           encodeAbiParameters(
             preparedM[1],
             // @ts-expect-error - TODO: fix this type issue
             await resolvePromisedValue(params ?? []),
-          ).slice(2)) as `${(typeof preparedM)[0]}${string}`;
+          ).slice(2) +
+          extraData) as `${(typeof preparedM)[0]}${string}`;
       },
     },
     {
