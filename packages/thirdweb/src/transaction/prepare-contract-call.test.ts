@@ -1,11 +1,11 @@
 import { describe, expect, test } from "vitest";
+import { TEST_ACCOUNT_A } from "~test/test-wallets.js";
 import { TEST_WALLET_B } from "../../test/src/addresses.js";
 import { USDT_CONTRACT_WITH_ABI } from "../../test/src/test-contracts.js";
 import { fromHex, toHex } from "../utils/encoding/hex.js";
 import { toWei } from "../utils/units.js";
-import { prepareContractCall } from "./prepare-contract-call.js";
 import { sendAndConfirmTransaction } from "./actions/send-and-confirm-transaction.js";
-import { TEST_ACCOUNT_A } from "~test/test-wallets.js";
+import { prepareContractCall } from "./prepare-contract-call.js";
 
 const extraString = "I'm a cat";
 const extraCallData = toHex(extraString);
