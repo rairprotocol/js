@@ -19,7 +19,7 @@ export type AppMetadata = {
   logoUrl?: string;
 };
 
-export type SocialAuthOption = "google" | "apple" | "facebook";
+export type SocialAuthOption = "google" | "apple" | "facebook" | "discord";
 
 export type AuthOption = "email" | "phone" | "passkey" | SocialAuthOption;
 

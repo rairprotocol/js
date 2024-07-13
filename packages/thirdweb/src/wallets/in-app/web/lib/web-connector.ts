@@ -15,6 +15,7 @@ import {
 import type { InAppConnector } from "../../core/interfaces/connector.js";
 import type { InAppWalletConstructorType } from "../types.js";
 import { InAppWalletIframeCommunicator } from "../utils/iFrameCommunication/InAppWalletIframeCommunicator.js";
+import { loginWithDiscord } from "./auth/discord.js";
 import { Auth, type AuthQuerierTypes } from "./auth/iframe-auth.js";
 import { loginWithPasskey, registerPasskey } from "./auth/passkeys.js";
 import { IFrameWallet } from "./in-app-account.js";
@@ -51,7 +52,7 @@ export class InAppWebConnector implements InAppConnector {
   }: InAppWalletConstructorType) {
     if (this.isClientIdLegacyPaper(client.clientId)) {
       throw new Error(
-        "You are using a legacy clientId. Please use the clientId found on the thirdweb dashboard settings page",
+        "You are using a legacy clientId. Please use the clientId found on the thirdweb dashboard settings page"
       );
     }
     const baseUrl = getThirdwebBaseUrl("inAppWallet");
@@ -133,7 +134,7 @@ export class InAppWebConnector implements InAppConnector {
   }
 
   async preAuthenticate(
-    args: MultiStepAuthProviderType,
+    args: MultiStepAuthProviderType
   ): Promise<SendEmailOtpReturnType> {
     const strategy = args.strategy;
     switch (strategy) {
@@ -146,13 +147,13 @@ export class InAppWebConnector implements InAppConnector {
       default:
         assertUnreachable(
           strategy,
-          `Provider: ${strategy} doesn't require pre-authentication`,
+          `Provider: ${strategy} doesn't require pre-authentication`
         );
     }
   }
 
   async authenticate(
-    args: MultiStepAuthArgsType | SingleStepAuthArgsType,
+    args: MultiStepAuthArgsType | SingleStepAuthArgsType
   ): Promise<AuthLoginReturnType> {
     const strategy = args.strategy;
     switch (strategy) {
@@ -215,6 +216,16 @@ export class InAppWebConnector implements InAppConnector {
         });
         return this.auth.loginWithAuthToken(authToken);
       }
+      case "discord": {
+        const authToken = await loginWithDiscord({
+          client: this.wallet.client,
+          ecosystem: this.wallet.ecosystem,
+          closeOpenedWindow: args.closeOpenedWindow,
+          openedWindow: args.openedWindow,
+        });
+        return this.auth.loginWithAuthToken(authToken);
+      }
+
       default:
         assertUnreachable(strategy);
     }
