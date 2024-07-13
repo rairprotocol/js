@@ -11,6 +11,7 @@ import {
   type PreparedMethod,
   prepareMethod,
 } from "../utils/abi/prepare-method.js";
+import { concatHex } from "../utils/encoding/helpers/concat-hex.js";
 import type { Hex } from "../utils/encoding/hex.js";
 import { resolvePromisedValue } from "../utils/promise/resolve-promised-value.js";
 import {
@@ -215,19 +216,13 @@ export function prepareContractCall<
         // just return the fn sig directly -> no params
         if (preparedM[1].length === 0) {
           if (extraCallData) {
-            const { concatHex } = await import(
-              "../utils/encoding/helpers/concat-hex.js"
-            );
             return concatHex([preparedM[0], extraCallData]);
           }
           return preparedM[0];
         }
 
         if (extraCallData) {
-          const [{ concatHex }, resolvedParams] = await Promise.all([
-            import("../utils/encoding/helpers/concat-hex.js"),
-            resolvePromisedValue(params ?? []),
-          ]);
+          const resolvedParams = await resolvePromisedValue(params ?? []);
           return concatHex([
             preparedM[0],
             encodeAbiParameters(
