@@ -28,7 +28,7 @@ export async function loginWithDiscord(options: {
     win = window.open(
       getDiscordLoginPath(options.client, options.ecosystem),
       "Login to discord",
-      DEFAULT_POP_UP_SIZE
+      DEFAULT_POP_UP_SIZE,
     );
     isWindowOpenedByFn = true;
   }
@@ -55,7 +55,7 @@ export async function loginWithDiscord(options: {
           eventType: string;
           authResult?: AuthStoredTokenWithCookieReturnType;
           errorString?: string;
-        }>
+        }>,
       ) => {
         if (event.origin !== getThirdwebBaseUrl("inAppWallet")) {
           return;
@@ -96,7 +96,7 @@ export async function loginWithDiscord(options: {
         }
       };
       window.addEventListener("message", messageListener);
-    }
+    },
   );
   return result;
 }
