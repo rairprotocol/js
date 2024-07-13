@@ -474,8 +474,6 @@ export type ToHexParameters = {
   size?: number;
 };
 
-export type ToHexInput = string | number | bigint | boolean | Uint8Array;
-
 /**
  * Converts a value to its hexadecimal representation.
  * @param value - The value to convert to hexadecimal.

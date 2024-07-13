@@ -11,7 +11,7 @@ import {
   type PreparedMethod,
   prepareMethod,
 } from "../utils/abi/prepare-method.js";
-import type { Hex, ToHexInput } from "../utils/encoding/hex.js";
+import type { Hex } from "../utils/encoding/hex.js";
 import { resolvePromisedValue } from "../utils/promise/resolve-promised-value.js";
 import {
   type PrepareTransactionOptions,
@@ -53,7 +53,7 @@ export type PrepareContractCallOptions<
   > & {
     contract: ThirdwebContract<TAbi>;
     method: TMethod | TPreparedMethod;
-    extraCallData?: ToHexInput;
+    extraCallData?: Hex;
   } & ParamsOption<TPreparedMethod[1]> &
     Omit<PrepareTransactionOptions, "to" | "data" | "chain" | "client">,
   TAbi
@@ -121,6 +121,23 @@ export type PrepareContractCallOptions<
  *  contract,
  *  method: "transfer", // <- this gets inferred from the contract
  *  params: [to, value],
+ * });
+ * ```
+ *
+ * @example
+ * Passing extra call data to the transaction
+ * ```ts
+ * import { getContract, prepareContractCall } from "thirdweb";
+ * const contract = getContract({
+ *   ..., // chain, address, client
+ * });
+ *
+ * const transaction = prepareContractCall({
+ *   contract,
+ *   method: "transfer",
+ *   params: [...],
+ *   // The extra call data MUST be encoded to hex before passing
+ *   extraCallData: "0x......."
  * });
  * ```
  */
@@ -195,24 +212,18 @@ export function prepareContractCall<
           preparedM = await preparedMethodPromise();
         }
 
-        let extraData: Hex | null = null;
-        if (extraCallData) {
-          const { toHex } = await import("../utils/encoding/hex.js");
-          extraData = toHex(extraCallData);
-        }
-
         // just return the fn sig directly -> no params
         if (preparedM[1].length === 0) {
-          if (extraData) {
+          if (extraCallData) {
             const { concatHex } = await import(
               "../utils/encoding/helpers/concat-hex.js"
             );
-            return concatHex([preparedM[0], extraData]);
+            return concatHex([preparedM[0], extraCallData]);
           }
           return preparedM[0];
         }
 
-        if (extraData) {
+        if (extraCallData) {
           const [{ concatHex }, resolvedParams] = await Promise.all([
             import("../utils/encoding/helpers/concat-hex.js"),
             resolvePromisedValue(params ?? []),
@@ -224,7 +235,7 @@ export function prepareContractCall<
               // @ts-expect-error - TODO: fix this type issue
               resolvedParams,
             ),
-            extraData,
+            extraCallData,
           ]);
         }
 
