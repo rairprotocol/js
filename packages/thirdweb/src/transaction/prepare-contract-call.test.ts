@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, it } from "vitest";
 import { TEST_ACCOUNT_A } from "~test/test-wallets.js";
 import { TEST_WALLET_B } from "../../test/src/addresses.js";
 import { USDT_CONTRACT_WITH_ABI } from "../../test/src/test-contracts.js";
@@ -12,7 +12,7 @@ const extraCallData = toHex(extraString);
 const account = TEST_ACCOUNT_A;
 
 describe.runIf(process.env.TW_SECRET_KEY)("prepareContractCall", () => {
-  test("should prepare a contract call with ABI", () => {
+  it("should prepare a contract call with ABI", () => {
     const preparedTx = prepareContractCall({
       contract: USDT_CONTRACT_WITH_ABI,
       method: "transfer",
@@ -21,11 +21,11 @@ describe.runIf(process.env.TW_SECRET_KEY)("prepareContractCall", () => {
     expect(preparedTx.to).toBe(USDT_CONTRACT_WITH_ABI.address);
   });
 
-  test("should be able to prepare a contract call with parameters & extra call data", async () => {
+  it("should be able to prepare a contract call with parameters & extra call data", async () => {
     const transaction = prepareContractCall({
       contract: USDT_CONTRACT_WITH_ABI,
-      method: "transfer",
-      params: [TEST_WALLET_B, toWei("100")],
+      method: "approve",
+      params: [TEST_WALLET_B, 100n],
       extraCallData,
     });
     const callData =
@@ -34,9 +34,15 @@ describe.runIf(process.env.TW_SECRET_KEY)("prepareContractCall", () => {
         : (await transaction.data?.()) || "0x";
     const decodedData = fromHex(callData, "string");
     expect(decodedData).toContain(extraString);
+
+    // Make sure the transaction is executable
+    const receipt = await sendAndConfirmTransaction({ transaction, account });
+    expect(receipt).toBeDefined();
+    expect(receipt.transactionHash.startsWith("0x")).toBe(true);
+    expect(receipt.status).toBe("success");
   });
 
-  test("should be able to prepare a contract call with NO parameters & extra call data", async () => {
+  it("should be able to prepare a contract call with NO parameters & extra call data", async () => {
     const transaction = prepareContractCall({
       contract: USDT_CONTRACT_WITH_ABI,
       method: "decimals",
@@ -54,6 +60,5 @@ describe.runIf(process.env.TW_SECRET_KEY)("prepareContractCall", () => {
     const receipt = await sendAndConfirmTransaction({ transaction, account });
     expect(receipt).toBeDefined();
     expect(receipt.transactionHash.startsWith("0x")).toBe(true);
-    expect(receipt.transactionHash).toBe(true);
   });
 });
