@@ -42,6 +42,8 @@ const socialIcons = {
   google: GOOGLE_ICON,
   facebook: FACEBOOK_ICON,
   apple: APPLE_ICON,
+  // TODO: replace me
+  discord: FACEBOOK_ICON,
 };
 
 type InAppWalletFormUIProps = {
