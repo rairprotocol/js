@@ -5,8 +5,8 @@
 @layer base {
   :root {
     /* bg - nuetral  */
-    --background: 0 0% 100%;
-    --secondary: 0 0% 97%;
+    --background: 0 0% 97%;
+    --secondary: 0 0% 100%;
     --muted: 0 0% 95%;
     --accent: 0 0% 92%;
     --card: var(--secondary);
