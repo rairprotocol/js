@@ -23,6 +23,7 @@ export type StaticPrepareTransactionOptions = {
   // tw specific
   chain: Chain;
   client: ThirdwebClient;
+  extraCallData?: Hex;
 };
 
 export type EIP712TransactionOptions = {

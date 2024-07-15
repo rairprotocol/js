@@ -11,7 +11,6 @@ import {
   type PreparedMethod,
   prepareMethod,
 } from "../utils/abi/prepare-method.js";
-import { concatHex } from "../utils/encoding/helpers/concat-hex.js";
 import type { Hex } from "../utils/encoding/hex.js";
 import { resolvePromisedValue } from "../utils/promise/resolve-promised-value.js";
 import {
@@ -158,7 +157,7 @@ export function prepareContractCall<
 >(options: PrepareContractCallOptions<TAbi, TMethod, TPreparedMethod>) {
   type ParsedMethod_ = ParseMethod<TAbi, TMethod>;
   type PreparedMethod_ = PreparedMethod<ParsedMethod_>;
-  const { contract, method, params, extraCallData, ...rest } = options;
+  const { contract, method, params, ...rest } = options;
 
   const preparedMethodPromise = () =>
     (async () => {
@@ -215,23 +214,7 @@ export function prepareContractCall<
 
         // just return the fn sig directly -> no params
         if (preparedM[1].length === 0) {
-          if (extraCallData) {
-            return concatHex([preparedM[0], extraCallData]);
-          }
           return preparedM[0];
-        }
-
-        if (extraCallData) {
-          const resolvedParams = await resolvePromisedValue(params ?? []);
-          return concatHex([
-            preparedM[0],
-            encodeAbiParameters(
-              preparedM[1],
-              // @ts-expect-error - TODO: fix this type issue
-              resolvedParams,
-            ),
-            extraCallData,
-          ]);
         }
 
         // we do a "manual" concat here to avoid the overhead of the "concatHex" function
