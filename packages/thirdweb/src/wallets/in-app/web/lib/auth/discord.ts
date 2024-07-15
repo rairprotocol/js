@@ -5,7 +5,10 @@ import type { Ecosystem } from "../../types.js";
 import { DEFAULT_POP_UP_SIZE } from "./constants.js";
 import { closeWindow } from "./utils.js";
 
-const getDiscordLoginPath = (client: ThirdwebClient, ecosystem?: Ecosystem) => {
+export const getDiscordLoginPath = (
+  client: ThirdwebClient,
+  ecosystem?: Ecosystem,
+) => {
   const baseUrl = `${getThirdwebBaseUrl("inAppWallet")}/api/2024-05-05/login/discord?clientId=${client.clientId}`;
   if (ecosystem?.partnerId) {
     return `${baseUrl}&ecosystemId=${ecosystem.id}&ecosystemPartnerId=${ecosystem.partnerId}`;

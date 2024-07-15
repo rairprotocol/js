@@ -57,6 +57,7 @@ const defaultAuthOptions: AuthOption[] = [
   "apple",
   "facebook",
   "passkey",
+  "discord",
 ];
 
 export type ConnectWalletSocialOptionsProps = {
@@ -88,6 +89,7 @@ export const ConnectWalletSocialOptions = (
     google: locale.signInWithGoogle,
     facebook: locale.signInWithFacebook,
     apple: locale.signInWithApple,
+    discord: locale.signInWithDiscord,
   };
 
   const { data: ecosystemAuthOptions, isLoading } = useQuery({
@@ -149,15 +151,27 @@ export const ConnectWalletSocialOptions = (
   }
 
   const socialLogins = authOptions.filter(
-    (x) => x === "google" || x === "apple" || x === "facebook",
+    (x) =>
+      x === "google" || x === "apple" || x === "facebook" || x === "discord",
   );
 
   const hasSocialLogins = socialLogins.length > 0;
+  const ecosystemInfo = isEcosystemWallet(wallet)
+    ? {
+        id: wallet.id,
+        partnerId: wallet.getConfig()?.partnerId,
+      }
+    : undefined;
 
   // Need to trigger login on button click to avoid popup from being blocked
   const handleSocialLogin = async (strategy: SocialAuthOption) => {
     try {
-      const socialLoginWindow = openOauthSignInWindow(strategy, themeObj);
+      const socialLoginWindow = openOauthSignInWindow({
+        authOption: strategy,
+        themeObj,
+        client: props.client,
+        ecosystem: ecosystemInfo,
+      });
       if (!socialLoginWindow) {
         throw new Error("Failed to open login window");
       }
