@@ -23,6 +23,7 @@ import { Spacer } from "../components/spacer.js";
 import { ThemedText } from "../components/text.js";
 import {
   APPLE_ICON,
+  DISCORD_ICON,
   EMAIL_ICON,
   FACEBOOK_ICON,
   GOOGLE_ICON,
@@ -42,8 +43,7 @@ const socialIcons = {
   google: GOOGLE_ICON,
   facebook: FACEBOOK_ICON,
   apple: APPLE_ICON,
-  // TODO: replace me
-  discord: FACEBOOK_ICON,
+  discord: DISCORD_ICON,
 };
 
 type InAppWalletFormUIProps = {
