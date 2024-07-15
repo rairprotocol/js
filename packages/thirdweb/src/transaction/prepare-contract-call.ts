@@ -11,7 +11,6 @@ import {
   type PreparedMethod,
   prepareMethod,
 } from "../utils/abi/prepare-method.js";
-import type { Hex } from "../utils/encoding/hex.js";
 import { resolvePromisedValue } from "../utils/promise/resolve-promised-value.js";
 import {
   type PrepareTransactionOptions,
@@ -53,7 +52,6 @@ export type PrepareContractCallOptions<
   > & {
     contract: ThirdwebContract<TAbi>;
     method: TMethod | TPreparedMethod;
-    extraCallData?: Hex;
   } & ParamsOption<TPreparedMethod[1]> &
     Omit<PrepareTransactionOptions, "to" | "data" | "chain" | "client">,
   TAbi
@@ -212,8 +210,8 @@ export function prepareContractCall<
           preparedM = await preparedMethodPromise();
         }
 
-        // just return the fn sig directly -> no params
         if (preparedM[1].length === 0) {
+          // just return the fn sig directly -> no params
           return preparedM[0];
         }
 
