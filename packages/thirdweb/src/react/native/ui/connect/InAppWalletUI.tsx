@@ -63,7 +63,7 @@ export function InAppWalletUI(props: InAppWalletFormUIProps) {
   const config = wallet.getConfig();
   const authOptions = config?.auth?.options || defaultAuthOptions;
   const socialLogins = authOptions.filter(
-    (x) => x === "google" || x === "apple" || x === "facebook",
+    (x) => x === "google" || x === "apple" || x === "facebook" || x === "discord",
   ) as InAppWalletSocialAuth[];
 
   const [inputMode, setInputMode] = useState<"email" | "phone">("email");
@@ -113,6 +113,7 @@ function SocialLogin(
     connector({
       wallet,
       connectFn: async () => {
+        console.log("CONNECTOR", connector);
         await wallet.connect({
           client,
           strategy: auth,

@@ -35,6 +35,7 @@ export class InAppNativeConnector implements InAppConnector {
   private options: NativeConnectorOptions;
 
   constructor(options: NativeConnectorOptions) {
+    console.log("creating native connector right here");
     this.options = options;
   }
 
@@ -91,6 +92,7 @@ export class InAppNativeConnector implements InAppConnector {
   }
 
   async authenticate(params: AuthArgsType): Promise<AuthLoginReturnType> {
+    console.log("authenticating...");
     const strategy = params.strategy;
     switch (strategy) {
       case "email": {
@@ -109,6 +111,7 @@ export class InAppNativeConnector implements InAppConnector {
       }
       case "google":
       case "facebook":
+      case "discord":
       case "apple": {
         const ExpoLinking = require("expo-linking");
         const redirectUrl =
@@ -139,9 +142,6 @@ export class InAppNativeConnector implements InAppConnector {
       }
       case "iframe_email_verification": {
         throw new Error("iframe_email_verification is not supported in native");
-      }
-      case "discord": {
-        throw new Error("Discord authentication is not supported in native");
       }
       default:
         assertUnreachable(strategy);

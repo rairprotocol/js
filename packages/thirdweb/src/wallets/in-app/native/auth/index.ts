@@ -17,6 +17,7 @@ import { getOrCreateInAppWalletConnector } from "../../core/wallet/in-app-core.j
 async function getInAppWalletConnector(client: ThirdwebClient) {
   return getOrCreateInAppWalletConnector(client, async (client) => {
     const { InAppNativeConnector } = await import("../native-connector.js");
+    console.log("Connector here");
     return new InAppNativeConnector({
       client: client,
     });
@@ -136,6 +137,7 @@ export async function preAuthenticate(args: PreAuthArgsType) {
 export async function authenticate(
   args: AuthArgsType,
 ): Promise<AuthLoginReturnType> {
+  console.log("Getting connector");
   const connector = await getInAppWalletConnector(args.client);
   return connector.authenticate(args);
 }
