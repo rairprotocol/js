@@ -32,6 +32,7 @@ import {
   extractFunctionsFromAbi,
   fetchContractMetadata,
   fetchPreDeployMetadata,
+  fetchAndCacheDeployMetadata, 
   fetchRawPredeployMetadata,
   getTrustedForwarders,
   isExtensionEnabled,
@@ -734,6 +735,12 @@ export function useCustomContractDeployMutation(
           };
           const zkSigner = new Web3Provider(fakeExternalProvider).getSigner();
 
+          const publishUri = ipfsHash.startsWith("ipfs://")
+          ? ipfsHash
+          : `ipfs://${ipfsHash}`;
+
+          let uriToRegister = "";
+
           if (
             fullPublishMetadata?.data?.compilers?.zksolc ||
             rawPredeployMetadata?.data?.compilers?.zksolc
@@ -746,9 +753,7 @@ export function useCustomContractDeployMutation(
                 : data.saltForCreate2;
 
               contractAddress = await zkDeployContractFromUri(
-                ipfsHash.startsWith("ipfs://")
-                  ? ipfsHash
-                  : `ipfs://${ipfsHash}`,
+                publishUri,
                 Object.values(data.deployParams),
                 zkSigner,
                 StorageSingleton,
@@ -763,9 +768,7 @@ export function useCustomContractDeployMutation(
               );
             } else {
               contractAddress = await zkDeployContractFromUri(
-                ipfsHash.startsWith("ipfs://")
-                  ? ipfsHash
-                  : `ipfs://${ipfsHash}`,
+                publishUri,
                 Object.values(data.deployParams),
                 zkSigner,
                 StorageSingleton,
@@ -777,15 +780,48 @@ export function useCustomContractDeployMutation(
                 },
               );
             }
+
+            const { compilerMetadata, } = await fetchAndCacheDeployMetadata(
+              publishUri,
+              StorageSingleton,
+              {
+                compilerOptions: {
+                  compilerType: "zksolc",
+                },
+              },
+            );
+            uriToRegister = compilerMetadata.fetchedMetadataUri;
           } else {
             contractAddress = await zkDeployContractFromUri(
-              ipfsHash.startsWith("ipfs://") ? ipfsHash : `ipfs://${ipfsHash}`,
+              publishUri,
               Object.values(data.deployParams),
               zkSigner,
               StorageSingleton,
               chainId as number,
             );
+
+            const { compilerMetadata, } = await fetchAndCacheDeployMetadata(
+              publishUri,
+              StorageSingleton,
+              {
+                compilerOptions: {
+                  compilerType: "zksolc",
+                },
+              },
+            );
+            uriToRegister = compilerMetadata.fetchedMetadataUri;
           }
+
+          // register deployed zksync contract on multichain registry
+          await addContractToMultiChainRegistry(
+            {
+              address: contractAddress,
+              chainId,
+              metadataURI: uriToRegister
+            },
+            account,
+          );
+
         } else {
           if (data.deployDeterministic) {
             const salt = data.signerAsSalt
