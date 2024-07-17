@@ -1,5 +1,11 @@
 # thirdweb
 
+## 5.35.1
+
+### Patch Changes
+
+- [#3719](https://github.com/thirdweb-dev/js/pull/3719) [`05df89c`](https://github.com/thirdweb-dev/js/commit/05df89cb614cb40903f27b8904995c9847fd620c) Thanks [@joaquim-verges](https://github.com/joaquim-verges)! - Add support for ERC20 paymaster for smart accounts
+
 ## 5.35.0
 
 ### Minor Changes
